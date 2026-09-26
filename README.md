@@ -3,7 +3,6 @@
 **Autor:** Marco Pérez Padilla  
 **Correo:** alu0101469348@ull.edu.es  
 **Asignatura:** Complejidad Computacional — Curso 2026/27  
-**Práctica 1** — Fecha límite de entrega: 9 de octubre de 2026  
 
 Simulador orientado a objetos de un autómata con pila, escrito en C++. Dado
 un fichero de texto con la definición formal del autómata y una serie de
@@ -39,16 +38,9 @@ El enunciado exige implementar **solo uno** de los dos criterios de
 aceptación posibles (por vaciado de pila o por estado final). Por mi cuenta,
 y como reto añadido, he decidido implementar **los dos**, con el programa
 decidiendo automáticamente cuál le corresponde a cada fichero de definición
-(lo explico en la siguiente sección). De la misma manera, la batería de
-tests con GoogleTest que acompaña al código tampoco la pedía el enunciado:
-la he añadido porque quería practicar tests en C++, ya que hasta ahora solo
-había escrito tests en TypeScript, Python, JavaScript y Ruby.
+(lo explico en la siguiente sección).
 
-El resto del diseño sí busca ajustarse a lo pedido: programación orientada a
-objetos, patrón Strategy para los dos criterios de aceptación (y Factory
-para construirlos), principios SOLID/KISS/YAGNI/DRY, la guía de estilo de
-Google C++ (con una única excepción, que explico más abajo), y una
-estructura de proyecto estándar con `include/`, `src/`, `tests/` y `data/`.
+El proyecto tiene una estructura de proyecto estándar con `include/`, `src/`, `tests/` y `data/`.
 
 ## Tipo de autómata implementado
 
@@ -114,7 +106,7 @@ por la cadena nueva de un plumazo.
 │   └── help/            # Help, Usage, PrintWarning/PrintError, ValidateArguments
 ├── src/                # implementación (.cc), misma organización que include/
 ├── tests/              # tests de GoogleTest, un fichero por cada .h/.cc de arriba
-├── libs/googletest/     # código fuente de GoogleTest (vendorizado, sin submódulo)
+├── libs/googletest/     # código fuente de GoogleTest
 └── data/
     ├── automata/         # ficheros de definición (para -config), válidos y de error
     └── strings/          # ficheros de cadenas de entrada (para -in)
@@ -124,18 +116,9 @@ por la cadena nueva de un plumazo.
 
 - **Patrón Strategy** para el criterio de aceptación: `AcceptanceCriterion`
   es la interfaz, con `FinalStateAcceptance` y `EmptyStackAcceptance` como
-  las dos estrategias concretas. `PushdownAutomaton` solo conoce la
-  interfaz; añadir un tercer criterio de aceptación en el futuro no
-  tocaría ni una línea de la clase del autómata.
+  las dos estrategias concretas. 
 - **Patrón Factory** (`MakeAcceptanceCriterion`): dado el tipo detectado por
   el parser, construye la estrategia concreta correspondiente.
-- **Excepciones en vez de códigos de error**: la guía de estilo de Google
-  prohíbe las excepciones, y es la única regla suya que no sigo a rajatabla.
-  Lo decidí así porque necesitaba distinguir con claridad los errores
-  críticos (se reporta y se cierra el programa) de los no críticos (se
-  reporta y se continúa), y las excepciones dejan esa distinción en manos
-  de quien captura, en vez de tener que propagar códigos de retorno por
-  cada función intermedia. Toda la jerarquía cuelga de `PdaException`.
 - **Simulación por DFS**: `Simulator::Explore` recorre las configuraciones
   del autómata en profundidad, probando antes las transiciones que
   consumen símbolo y después las de ε, con un conjunto de configuraciones
@@ -230,10 +213,7 @@ Containers: Reopen in Container*, que deja el entorno listo (compilador,
 Un APf con conjunto de estados finales `F` vacío es indistinguible de un
 APv: al no tener ningún token, la línea de `F` desaparece del fichero al
 leerlo, exactamente igual que si esa línea nunca hubiese existido. En ese
-caso el programa detecta el autómata como APv en vez de como APf. No tiene
-impacto práctico, ya que un APf con `F = ∅` no puede aceptar ninguna cadena
-en ningún caso; queda documentado aquí porque es una limitación real del
-formato, no un descuido de la implementación.
+caso el programa detecta el autómata como APv en vez de como APf. 
 
 ## Repositorio
 
