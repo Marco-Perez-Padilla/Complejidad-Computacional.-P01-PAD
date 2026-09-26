@@ -1,9 +1,9 @@
 # Simulador de un Autómata con Pila
 
-**Autor:** Marco Pérez Padilla
-**Correo:** alu0101469348@ull.edu.es
-**Asignatura:** Complejidad Computacional — Curso 2026/27
-**Práctica 1** — Fecha límite de entrega: 9 de octubre de 2026
+**Autor:** Marco Pérez Padilla  
+**Correo:** alu0101469348@ull.edu.es  
+**Asignatura:** Complejidad Computacional — Curso 2026/27  
+**Práctica 1** — Fecha límite de entrega: 9 de octubre de 2026  
 
 Simulador orientado a objetos de un autómata con pila, escrito en C++. Dado
 un fichero de texto con la definición formal del autómata y una serie de
@@ -237,4 +237,4 @@ formato, no un descuido de la implementación.
 
 ## Repositorio
 
-Código fuente completo en GitHub: `<añadir enlace aquí>`
+Código fuente completo en GitHub: `https://github.com/Marco-Perez-Padilla/Complejidad-Computacional.-P01-PAD`
