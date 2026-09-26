@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File pushdown_automaton_test.cc: tests for PushdownAutomaton,
 // covering both its getters and the validation performed by its
 // constructor.
@@ -12,8 +10,6 @@
 
 namespace {
 
-// Builds a minimal well-formed automaton, so every test only has to
-// change the one thing it is actually checking.
 PushdownAutomaton MakeValidAutomaton() {
   Alphabet input_alphabet;
   input_alphabet.AddSymbol('a');
@@ -145,8 +141,6 @@ TEST(PushdownAutomatonTest, RejectsTransitionPushingSymbolOutsideGamma) {
       InvalidDefinitionException);
 }
 
-// An epsilon transition (input == kEpsilon) must never be rejected as
-// "input outside Sigma", since it is not meant to be in Sigma at all.
 TEST(PushdownAutomatonTest, AcceptsEpsilonTransition) {
   Alphabet input_alphabet;
   Alphabet stack_alphabet;

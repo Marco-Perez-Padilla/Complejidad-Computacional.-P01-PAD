@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File help_functions_test.cc: tests for Help, Usage, PrintWarning,
 // PrintError and ValidateArguments.
 //
@@ -16,9 +14,6 @@
 
 namespace {
 
-// Builds a char* argv[] (and its matching argc) from a list of strings,
-// the shape ValidateArguments expects. argument_storage must outlive
-// the returned pointers, so the caller keeps it alive on the stack.
 std::vector<char*> MakeArgv(std::vector<std::string>& argument_storage) {
   std::vector<char*> argv;
   for (std::string& argument : argument_storage) {
@@ -140,8 +135,6 @@ TEST(ValidateArgumentsTest, ValidArgumentsFillOptionsAndReturnMinusOne) {
   EXPECT_FALSE(options.output_file.has_value());
 }
 
-// -out only makes sense together with -trace; without it, it should be
-// dropped with a warning rather than silently kept.
 TEST(ValidateArgumentsTest, OutputFileWithoutTraceIsDroppedWithWarning) {
   std::vector<std::string> argument_storage{"pda_simulator", "-config",
                                              "data.txt", "-out", "trace.txt"};

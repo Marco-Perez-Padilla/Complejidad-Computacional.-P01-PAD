@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File simulator_test.cc: tests for Simulator, built directly on small
 // hand-made automata (not through the parser, to keep each test
 // focused on the search itself).
@@ -14,8 +12,6 @@
 
 namespace {
 
-// a^n b^n (n > 0), acceptance by empty stack — the same language as
-// Marco's APv example, built directly instead of parsed from a file.
 PushdownAutomaton MakeEmptyStackAnBn() {
   Alphabet input_alphabet;
   input_alphabet.AddSymbol('a');
@@ -32,8 +28,6 @@ PushdownAutomaton MakeEmptyStackAnBn() {
                             'S', transitions, AutomatonType::kEmptyStack, {});
 }
 
-// a^n b^n (n > 0), acceptance by final state — the same language as
-// Marco's APf example.
 PushdownAutomaton MakeFinalStateAnBn() {
   Alphabet input_alphabet;
   input_alphabet.AddSymbol('a');
@@ -104,8 +98,6 @@ TEST(SimulatorTest, TraceWriterReceivesHeaderAndFinalResult) {
   EXPECT_NE(trace.find("Result: ACCEPTED"), std::string::npos);
 }
 
-// With a max_depth of zero, the search cannot even reach the second
-// configuration, so any non-trivial word must be rejected.
 TEST(SimulatorTest, ExceedingMaxDepthRejectsTheWord) {
   PushdownAutomaton automaton = MakeEmptyStackAnBn();
   Simulator simulator(automaton, /*max_depth=*/0);

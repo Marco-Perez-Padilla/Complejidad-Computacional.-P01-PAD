@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File acceptance_factory_test.cc: tests for MakeAcceptanceCriterion.
 // The concrete strategy is checked indirectly, through its Name() and
 // IsAccepting() behavior, since the factory only returns the abstract

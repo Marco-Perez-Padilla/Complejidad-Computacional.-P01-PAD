@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File menu_test.cc: tests for Menu, driven entirely through
 // istringstream/ostringstream instead of std::cin/std::cout.
 
@@ -81,8 +79,6 @@ TEST(MenuTest, FileModeChecksWordsFromTheGivenFile) {
   std::remove(path.c_str());
 }
 
-// A missing file in file mode is a non-critical error: it is reported
-// as a warning and the menu keeps running.
 TEST(MenuTest, FileModeWithMissingFileWarnsAndReturnsToMenu) {
   PushdownAutomaton automaton = MakeEmptyStackAnBn();
   std::ostringstream out;

@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File empty_stack_acceptance_test.cc: tests for the
 // acceptance-by-empty-stack strategy.
 
@@ -28,7 +26,6 @@ TEST(EmptyStackAcceptanceTest, RejectsWhenInputIsNotFullyConsumed) {
   EXPECT_FALSE(acceptance.IsAccepting(configuration));
 }
 
-// The current state must be irrelevant for this acceptance mode.
 TEST(EmptyStackAcceptanceTest, StateDoesNotAffectAcceptance) {
   EmptyStackAcceptance acceptance;
   Configuration configuration{"any_state", "", ""};

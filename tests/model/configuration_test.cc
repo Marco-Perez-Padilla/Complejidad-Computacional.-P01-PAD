@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File configuration_test.cc: tests for Configuration::Key, used by
 // Simulator to detect already-visited configurations.
 

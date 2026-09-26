@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File final_state_acceptance_test.cc: tests for the
 // acceptance-by-final-state strategy.
 
@@ -28,7 +26,6 @@ TEST(FinalStateAcceptanceTest, RejectsWhenInputIsNotFullyConsumed) {
   EXPECT_FALSE(acceptance.IsAccepting(configuration));
 }
 
-// The stack content must be irrelevant for this acceptance mode.
 TEST(FinalStateAcceptanceTest, StackContentDoesNotAffectAcceptance) {
   FinalStateAcceptance acceptance({"q2"});
   Configuration configuration{"q2", "", "ZZZ"};

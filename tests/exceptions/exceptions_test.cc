@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File exceptions_test.cc: tests for the exception hierarchy in
 // exceptions.h. Each exception is checked for its exact message via
 // what(), and for being catchable as PdaException (its base class).
@@ -37,8 +35,6 @@ TEST(ExceptionsTest, InvalidWordMessageContainsWordAndSymbol) {
                "word 'aXb' contains symbol 'X' which is not in Sigma");
 }
 
-// Every concrete exception must be catchable through the base class, so
-// that generic error handling (e.g. in main) only needs one catch.
 TEST(ExceptionsTest, EveryExceptionIsCatchableAsPdaException) {
   EXPECT_THROW(
       {

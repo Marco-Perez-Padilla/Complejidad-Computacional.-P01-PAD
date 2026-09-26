@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File trace_writer_test.cc: tests for TraceWriter. Each Print*
 // method is checked against an in-memory ostringstream, so no real
 // file or terminal is needed.
@@ -62,8 +60,6 @@ TEST(TraceWriterTest, PrintConfigurationReportsNoApplicableTransitions) {
   EXPECT_NE(out.str().find("no applicable transitions"), std::string::npos);
 }
 
-// Deeper configurations must be indented further, so the tree shape of
-// the search is visible in the trace.
 TEST(TraceWriterTest, DeeperConfigurationsAreIndentedFurther) {
   std::ostringstream shallow;
   std::ostringstream deep;

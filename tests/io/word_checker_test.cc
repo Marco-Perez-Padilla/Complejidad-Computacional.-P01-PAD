@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File word_checker_test.cc: tests for WordChecker, both for a single
 // Check() call and for CheckAllFromFile().
 
@@ -55,7 +53,6 @@ TEST(WordCheckerTest, CheckPrintsAcceptedOrRejected) {
   EXPECT_NE(output.find("'aab': REJECTED"), std::string::npos);
 }
 
-// '.' is the file/keyboard notation for the empty word.
 TEST(WordCheckerTest, DotIsTreatedAsTheEmptyWord) {
   PushdownAutomaton automaton = MakeEmptyStackAnBn();
   std::ostringstream out;
@@ -123,9 +120,6 @@ TEST(WordCheckerTest, CheckAllFromFileSkipsAnInvalidWordAndContinues) {
   std::remove(path.c_str());
 }
 
-// CheckAllFromFile must report the exact line an invalid word came from,
-// counting blank lines too, so the number matches what a text editor
-// would show.
 TEST(WordCheckerTest, CheckAllFromFileReportsTheLineOfAnInvalidWord) {
   PushdownAutomaton automaton = MakeEmptyStackAnBn();
   std::ostringstream out;
@@ -142,8 +136,6 @@ TEST(WordCheckerTest, CheckAllFromFileReportsTheLineOfAnInvalidWord) {
   std::remove(path.c_str());
 }
 
-// A word checked directly (not from a file, as in keyboard mode) has no
-// line to report, so the warning must not mention one.
 TEST(WordCheckerTest, CheckWithoutALineNumberOmitsIt) {
   PushdownAutomaton automaton = MakeEmptyStackAnBn();
   std::ostringstream out;

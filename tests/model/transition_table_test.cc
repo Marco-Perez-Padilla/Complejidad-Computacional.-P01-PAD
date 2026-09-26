@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File transition_table_test.cc: tests for TransitionTable.
 
 #include "model/transition_table.h"
@@ -32,8 +30,6 @@ TEST(TransitionTableTest, FindReturnsEmptyWhenNothingMatches) {
   EXPECT_TRUE(table.Find("q1", 'a', 'A').empty());
 }
 
-// A pushdown automaton can be non-deterministic: more than one
-// transition may share the same (state, input, top).
 TEST(TransitionTableTest, FindReturnsAllNonDeterministicMatches) {
   TransitionTable table;
   table.Add({"q1", 'a', 'Z', "q1", "AZ"});

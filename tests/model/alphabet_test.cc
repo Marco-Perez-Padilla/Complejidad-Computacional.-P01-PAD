@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File alphabet_test.cc: tests for the Alphabet class.
 
 #include "model/alphabet.h"

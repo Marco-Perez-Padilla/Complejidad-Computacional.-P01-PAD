@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File automaton_parser_test.cc: tests for ParseAutomatonFile. Writes
 // small definition files under a temporary path, parses them, and
 // checks either the resulting PushdownAutomaton or the exception
@@ -17,8 +15,6 @@
 
 namespace {
 
-// Writes content to a fresh temporary file and returns its path. The
-// caller is responsible for removing it (std::remove) once done.
 std::string WriteTempFile(const std::string& name, const std::string& content) {
   std::string path = "/tmp/pda_test_" + name + ".txt";
   std::ofstream file(path);
@@ -156,8 +152,6 @@ TEST(AutomatonParserTest, FinalStateNotInQThrowsInvalidDefinitionException) {
   std::remove(path.c_str());
 }
 
-// A duplicate transition is not an error: it is reported as a warning
-// (checked here through stderr capture) and simply not added twice.
 TEST(AutomatonParserTest, DuplicateTransitionIsWarnedAboutAndSkipped) {
   std::string content = "q1\na\nZ\nq1\nZ\nq1 a Z q1 Z\nq1 a Z q1 Z\n";
   std::string path = WriteTempFile("duplicate", content);

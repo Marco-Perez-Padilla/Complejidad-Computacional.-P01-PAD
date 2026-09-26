@@ -1,5 +1,3 @@
-// [Project header — added by Marco]
-
 // File application_test.cc: end-to-end tests for Application::Run,
 // using real temporary automaton/word files and istringstream/
 // ostringstream instead of std::cin/std::cout.
