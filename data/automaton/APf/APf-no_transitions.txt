@@ -1,0 +1,7 @@
+# The file ends right after the initial stack symbol: there is
+# neither a set of final states nor any transition.
+q1 q2 q3
+a b
+S A
+q1
+S

@@ -1,0 +1,8 @@
+# The origin state 'q3' of the second transition is not in Q
+q1 q2
+a b
+S A
+q1
+S
+q1 a S q1 A
+q3 b A q2 .

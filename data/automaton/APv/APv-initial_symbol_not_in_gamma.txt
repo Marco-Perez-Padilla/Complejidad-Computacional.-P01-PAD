@@ -1,0 +1,8 @@
+# The initial stack symbol 'Z' is not in Gamma = {S, A}
+q1 q2
+a b
+S A
+q1
+Z
+q1 a S q1 A
+q1 b A q2 .

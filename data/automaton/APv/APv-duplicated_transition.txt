@@ -1,0 +1,11 @@
+# The second transition is identical to the first one: this is
+# not a critical error, it is only reported as a warning and the
+# repeated one is skipped.
+q1 q2
+a b
+S A
+q1
+S
+q1 a S q1 A
+q1 a S q1 A
+q1 b A q2 .

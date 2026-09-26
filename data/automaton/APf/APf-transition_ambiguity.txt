@@ -1,0 +1,11 @@
+# The sixth line is not a well-formed transition (it is missing
+# fields) and not all of its tokens are states of Q either: there
+# is no way to tell whether it is the set F or the first transition.
+q1 q2 q3
+a b
+S A
+q1
+S
+q3 qX
+q1 a S q1 AS
+q1 b A q2 .

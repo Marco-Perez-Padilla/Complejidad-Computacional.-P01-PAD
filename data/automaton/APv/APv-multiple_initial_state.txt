@@ -1,0 +1,8 @@
+# The initial state must be a single token; here there are two
+q1 q2
+a b
+S A
+q1 q2
+S
+q1 a S q1 A
+q1 b A q2 .

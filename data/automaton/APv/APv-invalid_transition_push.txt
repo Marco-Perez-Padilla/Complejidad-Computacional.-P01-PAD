@@ -1,0 +1,8 @@
+# In the string to push 'AZ', 'Z' does not belong to Gamma = {S, A}
+q1 q2
+a b
+S A
+q1
+S
+q1 a S q1 AZ
+q1 b A q2 .

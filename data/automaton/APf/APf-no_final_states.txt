@@ -1,0 +1,13 @@
+# This was meant to be an APf for L = {a^nb^n | n > 0}, but the set
+# of final states F was left out by mistake: the line with 'q3'
+# that should come right after the initial stack symbol is missing.
+q1 q2 q3
+a b
+S A
+q1
+S
+q1 a S q1 AS
+q1 a A q1 AA
+q1 b A q2 .
+q2 b A q2 .
+q2 . S q3 S

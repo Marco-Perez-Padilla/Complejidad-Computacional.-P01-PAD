@@ -1,0 +1,9 @@
+# 'Z' does not belong to Gamma = {S, A}; the stack top can never
+# be epsilon.
+q1 q2
+a b
+S A
+q1
+S
+q1 a S q1 A
+q1 b Z q2 .

@@ -1,0 +1,9 @@
+# 'c' does not belong to Sigma = {a, b}, nor is it the epsilon
+# marker '.'
+q1 q2
+a b
+S A
+q1
+S
+q1 a S q1 A
+q1 c A q2 .

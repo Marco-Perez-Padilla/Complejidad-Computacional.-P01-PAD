@@ -1,0 +1,8 @@
+# The second transition only has 4 fields, it should have 5
+q1 q2
+a b
+S A
+q1
+S
+q1 a S q1 A
+q1 b A q2
