@@ -12,7 +12,7 @@
 ** File configuration.h: an instantaneous description of a pushdown automaton during simulation.
 **/
 
-#ifndef _CONFIGURATION_H_
+#ifndef CONFIGURATION_H_
 #define CONFIGURATION_H_
 
 #include <string>

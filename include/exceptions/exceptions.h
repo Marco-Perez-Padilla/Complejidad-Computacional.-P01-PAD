@@ -79,4 +79,4 @@ class InvalidWordException : public PdaException {
       : PdaException("word '" + word + "' contains symbol '" + std::string(1, symbol) + "' which is not in Sigma") {}
 };
 
-#endif  // EXCEPTIONS_H_
+#endif 

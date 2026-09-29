@@ -271,7 +271,7 @@ PushdownAutomaton ParseAutomatonFile(const std::string& filename) {
     if (!all_states) {
       throw InvalidDefinitionException(
           lines[index].number,
-          "cannot tell whether this line is the set of final states or " "the first transition");
+          "line is neither a valid set of final states nor a well-formed transition");
     }
     type = AutomatonType::kFinalState;
     for (const std::string& token : next_tokens) final_states.insert(token);
