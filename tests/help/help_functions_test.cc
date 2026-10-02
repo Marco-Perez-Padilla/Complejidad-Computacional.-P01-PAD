@@ -14,6 +14,9 @@
 
 namespace {
 
+// Builds a char* argv[] (and its matching argc) from a list of strings,
+// the shape ValidateArguments expects. argument_storage must outlive
+// the returned pointers, so the caller keeps it alive on the stack.
 std::vector<char*> MakeArgv(std::vector<std::string>& argument_storage) {
   std::vector<char*> argv;
   for (std::string& argument : argument_storage) {
@@ -120,7 +123,8 @@ TEST(ValidateArgumentsTest, UnknownOptionReturnsOne) {
 
 TEST(ValidateArgumentsTest, ValidArgumentsFillOptionsAndReturnMinusOne) {
   std::vector<std::string> argument_storage{
-      "pda_simulator", "-config", "data.txt", "-trace", "-in", "words.txt"};
+      "pda_simulator", "-config", "data.txt", "-type",
+      "apv",           "-trace",  "-in",      "words.txt"};
   std::vector<char*> argv = MakeArgv(argument_storage);
   Options options;
 
@@ -129,15 +133,82 @@ TEST(ValidateArgumentsTest, ValidArgumentsFillOptionsAndReturnMinusOne) {
 
   EXPECT_EQ(status, -1);
   EXPECT_EQ(options.config_file, "data.txt");
+  EXPECT_EQ(options.type, AutomatonType::kEmptyStack);
   EXPECT_TRUE(options.trace);
   ASSERT_TRUE(options.input_file.has_value());
   EXPECT_EQ(*options.input_file, "words.txt");
   EXPECT_FALSE(options.output_file.has_value());
 }
 
-TEST(ValidateArgumentsTest, OutputFileWithoutTraceIsDroppedWithWarning) {
+TEST(ValidateArgumentsTest, TypeApfIsParsedAsFinalState) {
   std::vector<std::string> argument_storage{"pda_simulator", "-config",
-                                             "data.txt", "-out", "trace.txt"};
+                                             "data.txt", "-type", "apf"};
+  std::vector<char*> argv = MakeArgv(argument_storage);
+  Options options;
+
+  int status =
+      ValidateArguments(static_cast<int>(argv.size()), argv.data(), &options);
+
+  EXPECT_EQ(status, -1);
+  EXPECT_EQ(options.type, AutomatonType::kFinalState);
+}
+
+TEST(ValidateArgumentsTest, MissingTypeReturnsOne) {
+  std::vector<std::string> argument_storage{"pda_simulator", "-config",
+                                             "data.txt"};
+  std::vector<char*> argv = MakeArgv(argument_storage);
+  Options options;
+
+  testing::internal::CaptureStderr();
+  testing::internal::CaptureStdout();
+  int status = ValidateArguments(static_cast<int>(argv.size()), argv.data(),
+                                  &options);
+  testing::internal::GetCapturedStdout();
+  std::string error_output = testing::internal::GetCapturedStderr();
+
+  EXPECT_EQ(status, 1);
+  EXPECT_NE(error_output.find("-type"), std::string::npos);
+}
+
+TEST(ValidateArgumentsTest, TypeWithoutValueReturnsOne) {
+  std::vector<std::string> argument_storage{"pda_simulator", "-config",
+                                             "data.txt", "-type"};
+  std::vector<char*> argv = MakeArgv(argument_storage);
+  Options options;
+
+  testing::internal::CaptureStderr();
+  testing::internal::CaptureStdout();
+  int status = ValidateArguments(static_cast<int>(argv.size()), argv.data(),
+                                  &options);
+  testing::internal::GetCapturedStdout();
+  testing::internal::GetCapturedStderr();
+
+  EXPECT_EQ(status, 1);
+}
+
+TEST(ValidateArgumentsTest, InvalidTypeValueReturnsOne) {
+  std::vector<std::string> argument_storage{"pda_simulator", "-config",
+                                             "data.txt", "-type", "bogus"};
+  std::vector<char*> argv = MakeArgv(argument_storage);
+  Options options;
+
+  testing::internal::CaptureStderr();
+  testing::internal::CaptureStdout();
+  int status = ValidateArguments(static_cast<int>(argv.size()), argv.data(),
+                                  &options);
+  testing::internal::GetCapturedStdout();
+  std::string error_output = testing::internal::GetCapturedStderr();
+
+  EXPECT_EQ(status, 1);
+  EXPECT_NE(error_output.find("bogus"), std::string::npos);
+}
+
+// -out only makes sense together with -trace; without it, it should be
+// dropped with a warning rather than silently kept.
+TEST(ValidateArgumentsTest, OutputFileWithoutTraceIsDroppedWithWarning) {
+  std::vector<std::string> argument_storage{
+      "pda_simulator", "-config", "data.txt",
+      "-type",         "apv",     "-out", "trace.txt"};
   std::vector<char*> argv = MakeArgv(argument_storage);
   Options options;
 

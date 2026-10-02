@@ -21,7 +21,6 @@ la simulación.
 - [Compilación y ejecución](#compilación-y-ejecución)
 - [Tests](#tests)
 - [Contenedor Docker](#contenedor-docker)
-- [Limitaciones conocidas](#limitaciones-conocidas)
 - [Repositorio](#repositorio)
 
 ## Introducción
@@ -36,9 +35,9 @@ cadenas de entrada pertenecen al lenguaje reconocido.
 
 El enunciado exige implementar **solo uno** de los dos criterios de
 aceptación posibles (por vaciado de pila o por estado final). Por mi cuenta,
-y como reto añadido, he decidido implementar **los dos**, con el programa
-decidiendo automáticamente cuál le corresponde a cada fichero de definición
-(lo explico en la siguiente sección).
+y como reto añadido, he decidido implementar **los dos**, indicando en cada
+ejecución cuál le corresponde al fichero de definición (lo explico en la
+siguiente sección).
 
 El proyecto tiene una estructura de proyecto estándar con `include/`, `src/`, `tests/` y `data/`.
 
@@ -51,16 +50,17 @@ Como decía, el programa soporta **ambos tipos**:
 - **APf**: aceptación por estado final. La cadena se acepta si, tras
   consumirla entera, el autómata está en uno de los estados de `F`.
 
-El tipo no se indica por línea de comandos ni se le pregunta al usuario: se
-**detecta automáticamente** a partir del fichero de definición. Tras leer
-`Q`, `Σ`, `Γ`, el estado inicial y el símbolo inicial de pila, la siguiente
-línea con contenido decide el tipo:
-
-- Si tiene la forma de una transición completa (`origen símbolo cima destino
-  apilar`, con todos los estados y símbolos ya declarados), es la primera
-  transición de un **APv**.
-- Si, en cambio, todos sus tokens son estados ya declarados en `Q`, es el
-  conjunto `F` de un **APf**.
+El tipo se indica con la opción obligatoria `-type apv|apf`; no se detecta
+automáticamente a partir del contenido del fichero. El motivo es que el
+formato de definición es ambiguo en un caso concreto: un APf cuyo conjunto
+de estados finales `F` está vacío es indistinguible de un APv, porque la
+línea de `F` desaparece del fichero al no tener ningún token, exactamente
+igual que si esa línea nunca hubiese existido. Con `-type`, el programa ya
+no necesita adivinar: lee la línea posterior al símbolo inicial de pila de
+forma estricta según el tipo indicado (como conjunto de estados finales si
+es `apf`, o como primera transición si es `apv`), y si el fichero no encaja
+con el tipo pedido, falla con un error claro en vez de interpretarlo como
+el otro tipo sin más.
 
 ## Formato del fichero de definición
 
@@ -117,8 +117,8 @@ por la cadena nueva de un plumazo.
 - **Patrón Strategy** para el criterio de aceptación: `AcceptanceCriterion`
   es la interfaz, con `FinalStateAcceptance` y `EmptyStackAcceptance` como
   las dos estrategias concretas. 
-- **Patrón Factory** (`MakeAcceptanceCriterion`): dado el tipo detectado por
-  el parser, construye la estrategia concreta correspondiente.
+- **Patrón Factory** (`MakeAcceptanceCriterion`): dado el tipo indicado por
+  línea de comandos, construye la estrategia concreta correspondiente.
 - **Simulación por DFS**: `Simulator::Explore` recorre las configuraciones
   del autómata en profundidad, probando antes las transiciones que
   consumen símbolo y después las de ε, con un conjunto de configuraciones
@@ -137,8 +137,10 @@ Distingo dos niveles de gravedad en todo el programa:
   termina con código `1`): fichero de definición inexistente o vacío,
   definición que incumple la definición formal de un AP (estado inicial
   fuera de `Q`, símbolo inicial de pila fuera de `Γ`, transiciones con
-  estados o símbolos no declarados...), argumentos de línea de comandos
-  incorrectos, o un fichero de `-in`/`-out` que no se puede abrir.
+  estados o símbolos no declarados...), el `-type` indicado no coincide con
+  lo que hay realmente en el fichero, argumentos de línea de comandos
+  incorrectos o incompletos (`-config` y `-type` son obligatorios), o un
+  fichero de `-in`/`-out` que no se puede abrir.
 - **Errores no críticos** (se avisa con `Warning:` por `stderr` y se
   continúa): una cadena de entrada con un símbolo fuera de `Σ` (se avisa,
   se salta esa cadena y se sigue con las demás, indicando la línea exacta
@@ -154,7 +156,6 @@ referencia para entender qué comprueba cada validación.
 
 ```bash
 make            # compila el simulador -> bin/main
-make run        # compila (si hace falta) y ejecuta bin/main
 make test       # compila y ejecuta la batería de tests -> bin/run_tests
 make clean      # borra build/ y bin/
 ```
@@ -162,20 +163,21 @@ make clean      # borra build/ y bin/
 El programa se invoca así:
 
 ```bash
-./bin/main -config <fichero> [-trace] [-in <fichero>] [-out <fichero>]
+./bin/pda -config <fichero> -type <apv|apf> [-trace] [-in <fichero>] [-out <fichero>]
 ```
 
-| Opción            | Obligatoria | Descripción                                                        |
-|-------------------|:-----------:|---------------------------------------------------------------------|
-| `-config <f>`     | Sí          | Fichero con la definición del autómata                              |
-| `-trace`          | No          | Muestra la traza de la simulación                                   |
-| `-in <f>`         | No          | Cadenas a comprobar, una por línea; sin ella se piden por teclado    |
-| `-out <f>`        | No          | Fichero donde escribir la traza; sin ella se escribe en pantalla     |
+| Opción              | Obligatoria | Descripción                                                                      |
+|---------------------|:-----------:|-----------------------------------------------------------------------------------|
+| `-config <f>`       | Sí          | Fichero con la definición del autómata                                            |
+| `-type <apv\|apf>`  | Sí          | Tipo del autómata de ese fichero (`apv` = vaciado de pila, `apf` = estado final)   |
+| `-trace`            | No          | Muestra la traza de la simulación                                                 |
+| `-in <f>`           | No          | Cadenas a comprobar, una por línea; sin ella se piden por teclado                  |
+| `-out <f>`          | No          | Fichero donde escribir la traza; sin ella se escribe en pantalla                   |
 
 Ejemplo, comprobando varias cadenas desde fichero con traza a otro fichero:
 
 ```bash
-./bin/main -config data/automata/APf-cadenas_an_bn.txt \
+./bin/main -config data/automata/APf-cadenas_an_bn.txt -type apf \
            -in data/strings/cadenas_apf.txt \
            -trace -out /tmp/traza.txt
 ```
@@ -191,7 +193,13 @@ Uso [GoogleTest](https://github.com/google/googletest), vendorizado en
 compilar). `make test` compila y lanza toda la batería. Cada clase tiene su
 fichero de test correspondiente en `tests/`, siguiendo la misma
 organización por carpetas que `include/`, y cubriendo tanto el
-comportamiento esperado como sus principales casos de error.
+comportamiento esperado como sus principales casos de error.  
+
+Una vez compilados, los tests se pueden ejecutar así:
+
+```bash
+./bin/run_tests
+```
 
 ## Contenedor Docker
 
@@ -207,13 +215,6 @@ make test                  # dentro ya del contenedor, como en local
 También se puede abrir la carpeta del proyecto en VS Code y elegir *Dev
 Containers: Reopen in Container*, que deja el entorno listo (compilador,
 `make`, y el resto de dependencias) sin ningún paso manual.
-
-## Limitaciones conocidas
-
-Un APf con conjunto de estados finales `F` vacío es indistinguible de un
-APv: al no tener ningún token, la línea de `F` desaparece del fichero al
-leerlo, exactamente igual que si esa línea nunca hubiese existido. En ese
-caso el programa detecta el autómata como APv en vez de como APf. 
 
 ## Repositorio
 

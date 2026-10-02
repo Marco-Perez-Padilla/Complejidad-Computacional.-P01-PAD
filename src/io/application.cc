@@ -31,7 +31,8 @@ Application::Application(Options options, std::istream& in, std::ostream& out)
     : options_(std::move(options)), in_(in), out_(out) {}
 
 PushdownAutomaton Application::LoadAutomaton() const {
-  PushdownAutomaton automaton = ParseAutomatonFile(options_.config_file);
+  PushdownAutomaton automaton =
+      ParseAutomatonFile(options_.config_file, options_.type);
   out_ << "Automaton loaded: " << automaton.States().size()
        << " states, acceptance by " << automaton.Acceptance().Name() << "\n";
   return automaton;

@@ -22,10 +22,11 @@
 void Help() {
   std::cout
       << "Pushdown automaton simulator\n\n"
-      << "Usage: ./pda_simulator -config <file> [-trace] [-in <file>] "
-         "[-out <file>]\n\n"
+      << "Usage: ./pda_simulator -config <file> -type <apv|apf> [-trace] "
+         "[-in <file>] [-out <file>]\n\n"
       << "Options:\n"
       << "  -config <file>   Automaton definition file (required)\n"
+      << "  -type <apv|apf>  Type of the automaton in that file (required)\n"
       << "  -trace           Show the simulation trace\n"
       << "  -in <file>       Input strings to check (optional; keyboard "
          "by default)\n"
@@ -44,11 +45,19 @@ void Usage() {
       << "Pushdown automaton (PDA) simulator\n\n"
       << "Simulates a pushdown automaton, with acceptance by empty stack "
          "or by\n"
-      << "final state. The type is detected automatically from the "
-         "definition\n"
-      << "file given with -config.\n\n"
+      << "final state. You must say which one with -type: the format of "
+         "the\n"
+      << "definition file is ambiguous when the set of final states is "
+         "empty or\n"
+      << "missing, so it cannot always be told apart from an empty-stack "
+         "automaton\n"
+      << "just by reading the file.\n\n"
       << "Command-line options:\n"
       << "  -config <file>   Automaton definition file (required)\n"
+      << "  -type <apv|apf>  Type of the automaton in that file "
+         "(required):\n"
+      << "                    apv = acceptance by empty stack\n"
+      << "                    apf = acceptance by final state\n"
       << "  -trace           Enable the simulation trace, showing the "
          "state, the\n"
       << "                    remaining input, the stack and the "
@@ -67,9 +76,8 @@ void Usage() {
       << "  A1 A2 A3 ...      stack alphabet Gamma\n"
       << "  q1                initial state\n"
       << "  A1                initial stack symbol\n"
-      << "  q2 q3 ...         set of final states F (only for a PDA "
-         "accepting\n"
-      << "                    by final state)\n"
+      << "  q2 q3 ...         set of final states F (only when -type "
+         "apf)\n"
       << "  q1 a A1 q2 A      one transition per line: "
          "delta(q1, a, A1) contains (q2, A)\n\n"
       << "Epsilon is written as a dot ('.'). On keyboard input, '.' "
@@ -116,6 +124,7 @@ int ValidateArguments(int argc, char* argv[], Options* options) {
   }
 
   bool has_config = false;
+  bool has_type = false;
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
     if (arg == "-config") {
@@ -126,6 +135,24 @@ int ValidateArguments(int argc, char* argv[], Options* options) {
       }
       options->config_file = argv[++i];
       has_config = true;
+    } else if (arg == "-type") {
+      if (i + 1 >= argc) {
+        PrintError("-type requires a value ('apv' or 'apf')");
+        Usage();
+        return 1;
+      }
+      std::string value = argv[++i];
+      if (value == "apv") {
+        options->type = AutomatonType::kEmptyStack;
+      } else if (value == "apf") {
+        options->type = AutomatonType::kFinalState;
+      } else {
+        PrintError("invalid value for -type: '" + value +
+                    "' (expected 'apv' or 'apf')");
+        Usage();
+        return 1;
+      }
+      has_type = true;
     } else if (arg == "-trace") {
       options->trace = true;
     } else if (arg == "-in") {
@@ -151,6 +178,11 @@ int ValidateArguments(int argc, char* argv[], Options* options) {
 
   if (!has_config) {
     PrintError("-config <file> is required");
+    Usage();
+    return 1;
+  }
+  if (!has_type) {
+    PrintError("-type <apv|apf> is required");
     Usage();
     return 1;
   }

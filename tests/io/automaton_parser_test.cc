@@ -1,7 +1,7 @@
 // File automaton_parser_test.cc: tests for ParseAutomatonFile. Writes
 // small definition files under a temporary path, parses them, and
 // checks either the resulting PushdownAutomaton or the exception
-// thrown for a malformed definition.
+// thrown for a malformed or mistyped definition.
 
 #include "include/io/automaton_parser.h"
 
@@ -55,10 +55,11 @@ const char kApfContent[] =
 
 }  // namespace
 
-TEST(AutomatonParserTest, ParsesTheEmptyStackExample) {
+TEST(AutomatonParserTest, ParsesTheEmptyStackExampleWithTypeApv) {
   std::string path = WriteTempFile("apv", kApvContent);
 
-  PushdownAutomaton automaton = ParseAutomatonFile(path);
+  PushdownAutomaton automaton =
+      ParseAutomatonFile(path, AutomatonType::kEmptyStack);
 
   EXPECT_EQ(automaton.Type(), AutomatonType::kEmptyStack);
   EXPECT_EQ(automaton.Acceptance().Name(), "empty stack");
@@ -70,10 +71,11 @@ TEST(AutomatonParserTest, ParsesTheEmptyStackExample) {
   std::remove(path.c_str());
 }
 
-TEST(AutomatonParserTest, ParsesTheFinalStateExample) {
+TEST(AutomatonParserTest, ParsesTheFinalStateExampleWithTypeApf) {
   std::string path = WriteTempFile("apf", kApfContent);
 
-  PushdownAutomaton automaton = ParseAutomatonFile(path);
+  PushdownAutomaton automaton =
+      ParseAutomatonFile(path, AutomatonType::kFinalState);
 
   EXPECT_EQ(automaton.Type(), AutomatonType::kFinalState);
   EXPECT_EQ(automaton.Acceptance().Name(), "final state");
@@ -88,26 +90,30 @@ TEST(AutomatonParserTest, CommentsAndBlankLinesAreIgnored) {
       "q1\n\n# a comment\n\na\nZ\nq1\nZ\nq1 a Z q1 Z\n";
   std::string path = WriteTempFile("comments", content);
 
-  PushdownAutomaton automaton = ParseAutomatonFile(path);
+  PushdownAutomaton automaton =
+      ParseAutomatonFile(path, AutomatonType::kEmptyStack);
 
   EXPECT_EQ(automaton.Transitions().Size(), 1u);
   std::remove(path.c_str());
 }
 
 TEST(AutomatonParserTest, MissingFileThrowsFileNotFoundException) {
-  EXPECT_THROW(ParseAutomatonFile("/does/not/exist.txt"),
-               FileNotFoundException);
+  EXPECT_THROW(
+      ParseAutomatonFile("/does/not/exist.txt", AutomatonType::kEmptyStack),
+      FileNotFoundException);
 }
 
 TEST(AutomatonParserTest, EmptyFileThrowsEmptyFileException) {
   std::string path = WriteTempFile("empty", "# only a comment\n");
-  EXPECT_THROW(ParseAutomatonFile(path), EmptyFileException);
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kEmptyStack),
+               EmptyFileException);
   std::remove(path.c_str());
 }
 
 TEST(AutomatonParserTest, TooFewLinesThrowsInvalidDefinitionException) {
   std::string path = WriteTempFile("short", "q1\na\n");
-  EXPECT_THROW(ParseAutomatonFile(path), InvalidDefinitionException);
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kEmptyStack),
+               InvalidDefinitionException);
   std::remove(path.c_str());
 }
 
@@ -115,7 +121,8 @@ TEST(AutomatonParserTest, InitialStateNotInQThrowsInvalidDefinitionException) {
   std::string content = "q1\na\nZ\nqX\nZ\nq1 a Z q1 Z\n";
   std::string path = WriteTempFile("bad_initial_state", content);
 
-  EXPECT_THROW(ParseAutomatonFile(path), InvalidDefinitionException);
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kEmptyStack),
+               InvalidDefinitionException);
   std::remove(path.c_str());
 }
 
@@ -124,7 +131,8 @@ TEST(AutomatonParserTest,
   std::string content = "q1\na\nZ\nq1\nY\nq1 a Z q1 Z\n";
   std::string path = WriteTempFile("bad_initial_stack", content);
 
-  EXPECT_THROW(ParseAutomatonFile(path), InvalidDefinitionException);
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kEmptyStack),
+               InvalidDefinitionException);
   std::remove(path.c_str());
 }
 
@@ -132,7 +140,8 @@ TEST(AutomatonParserTest, ReservedCharacterInAlphabetThrowsInvalidDefinition) {
   std::string content = "q1\na .\nZ\nq1\nZ\nq1 a Z q1 Z\n";
   std::string path = WriteTempFile("reserved_symbol", content);
 
-  EXPECT_THROW(ParseAutomatonFile(path), InvalidDefinitionException);
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kEmptyStack),
+               InvalidDefinitionException);
   std::remove(path.c_str());
 }
 
@@ -140,7 +149,8 @@ TEST(AutomatonParserTest, TransitionWithWrongFieldCountThrows) {
   std::string content = "q1\na\nZ\nq1\nZ\nq1 a Z q1\n";
   std::string path = WriteTempFile("bad_transition", content);
 
-  EXPECT_THROW(ParseAutomatonFile(path), InvalidDefinitionException);
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kEmptyStack),
+               InvalidDefinitionException);
   std::remove(path.c_str());
 }
 
@@ -148,7 +158,8 @@ TEST(AutomatonParserTest, FinalStateNotInQThrowsInvalidDefinitionException) {
   std::string content = "q1 q2\na\nZ\nq1\nZ\nqX\nq1 a Z q1 Z\n";
   std::string path = WriteTempFile("bad_final_state", content);
 
-  EXPECT_THROW(ParseAutomatonFile(path), InvalidDefinitionException);
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kFinalState),
+               InvalidDefinitionException);
   std::remove(path.c_str());
 }
 
@@ -157,10 +168,29 @@ TEST(AutomatonParserTest, DuplicateTransitionIsWarnedAboutAndSkipped) {
   std::string path = WriteTempFile("duplicate", content);
 
   testing::internal::CaptureStderr();
-  PushdownAutomaton automaton = ParseAutomatonFile(path);
+  PushdownAutomaton automaton =
+      ParseAutomatonFile(path, AutomatonType::kEmptyStack);
   std::string warning_output = testing::internal::GetCapturedStderr();
 
   EXPECT_EQ(automaton.Transitions().Size(), 1u);
   EXPECT_NE(warning_output.find("duplicate"), std::string::npos);
+  std::remove(path.c_str());
+}
+
+TEST(AutomatonParserTest,
+     TypeApfOnAFileWithoutFinalStatesThrowsInvalidDefinitionException) {
+  std::string content = kApvContent;  // same shape as a real APv: no F line
+  std::string path = WriteTempFile("apf_missing_final_states", content);
+
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kFinalState),
+               InvalidDefinitionException);
+  std::remove(path.c_str());
+}
+
+TEST(AutomatonParserTest, TypeApvOnARealApfFileThrowsInvalidDefinitionException) {
+  std::string path = WriteTempFile("apv_on_real_apf", kApfContent);
+
+  EXPECT_THROW(ParseAutomatonFile(path, AutomatonType::kEmptyStack),
+               InvalidDefinitionException);
   std::remove(path.c_str());
 }

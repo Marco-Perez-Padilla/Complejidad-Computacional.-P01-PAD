@@ -12,16 +12,16 @@
 ** File automaton_parser.cc: reads a pushdown automaton definition from a text file.
 **/
 
-#include "include/io/automaton_parser.h"
+#include "io/automaton_parser.h"
 
 #include <fstream>
 #include <set>
 #include <sstream>
 #include <vector>
 
-#include "include/exceptions/exceptions.h"
-#include "include/help/help_functions.h"
-#include "include/model/automaton_type.h"
+#include "exceptions/exceptions.h"
+#include "help/help_functions.h"
+#include "model/automaton_type.h"
 
 namespace {
 
@@ -81,11 +81,14 @@ Alphabet ParseAlphabet(const RawLine& line, const std::string& alphabet_name) {
   for (const std::string& token : Tokenize(line.content)) {
     if (token.size() != 1) {
       throw InvalidDefinitionException(
-          line.number, alphabet_name + " symbols must be a single character: '" + token + "'");
+          line.number, alphabet_name +
+                           " symbols must be a single character: '" +
+                           token + "'");
     }
     if (!alphabet.AddSymbol(token[0])) {
       throw InvalidDefinitionException(
-          line.number, "'" + token + "' is reserved and cannot belong to " + alphabet_name);
+          line.number, "'" + token + "' is reserved and cannot belong to " +
+                           alphabet_name);
     }
   }
   return alphabet;
@@ -98,24 +101,6 @@ std::set<std::string> ParseStateSet(const RawLine& line) {
   std::set<std::string> states;
   for (const std::string& token : Tokenize(line.content)) states.insert(token);
   return states;
-}
-
-/**
- * @brief Checks whether tokens has the shape of a well-formed
- * transition line given the sets already known.
- */
-bool LooksLikeTransition(const std::vector<std::string>& tokens,
-                          const std::set<std::string>& states,
-                          const Alphabet& input_alphabet,
-                          const Alphabet& stack_alphabet) {
-  if (tokens.size() != 5) return false;
-  if (states.find(tokens[0]) == states.end()) return false;
-
-  bool valid_input = tokens[1] == "." || (tokens[1].size() == 1 && input_alphabet.Contains(tokens[1][0]));
-  if (!valid_input) return false;
-
-  if (tokens[2].size() != 1 || !stack_alphabet.Contains(tokens[2][0])) {return false;}
-  return states.find(tokens[3]) != states.end();
 }
 
 /**
@@ -175,10 +160,31 @@ Transition ParseTransition(const RawLine& line,
 }
 
 /**
- * @brief Checks whether transition already exists in table with the same destination and push string.
+ * @brief Parses the tokens of line as the set of final states F, every
+ * one of which must already be a declared state.
+ */
+std::set<std::string> ParseFinalStates(const RawLine& line,
+                                        const std::set<std::string>& states) {
+  std::set<std::string> final_states;
+  for (const std::string& token : Tokenize(line.content)) {
+    if (states.find(token) == states.end()) {
+      throw InvalidDefinitionException(
+          line.number, "'" + token +
+                           "' is not in Q (expected the set of final "
+                           "states here, since -type apf was given)");
+    }
+    final_states.insert(token);
+  }
+  return final_states;
+}
+
+/**
+ * @brief Checks whether transition already exists in table with the
+ * same destination and push string.
  */
 bool IsDuplicate(const TransitionTable& table, const Transition& transition) {
-  for (const Transition& existing : table.Find(transition.from, transition.input, transition.top)) {
+  for (const Transition& existing :
+       table.Find(transition.from, transition.input, transition.top)) {
     if (existing.to == transition.to && existing.push == transition.push) {
       return true;
     }
@@ -188,28 +194,14 @@ bool IsDuplicate(const TransitionTable& table, const Transition& transition) {
 
 }  // namespace
 
-/**
- * @brief Reads a pushdown automaton definition from filename and builds
- * the corresponding PushdownAutomaton.
- *
- * The automaton type (empty stack or final state) is detected
- * automatically: the sixth meaningful line is treated as the set of
- * final states if every one of its tokens is a declared state and it
- * does not look like a well-formed transition; otherwise it is treated
- * as the first transition of an empty-stack automaton.
- *
- * @param filename Path to the definition file.
- * @return The parsed, validated automaton.
- * @throws FileNotFoundException if filename cannot be opened.
- * @throws EmptyFileException if the file has no meaningful content.
- * @throws InvalidDefinitionException if the definition is malformed or violates the formal definition of a pushdown automaton.
- */
-PushdownAutomaton ParseAutomatonFile(const std::string& filename) {
+PushdownAutomaton ParseAutomatonFile(const std::string& filename,
+                                      AutomatonType type) {
   std::vector<RawLine> lines = ReadMeaningfulLines(filename);
   if (lines.size() < 5) {
     throw InvalidDefinitionException(
         lines.back().number,
-        "the definition must include Q, Sigma, Gamma, the initial state and the initial stack symbol");
+        "the definition must include Q, Sigma, Gamma, the initial state "
+        "and the initial stack symbol");
   }
 
   size_t index = 0;
@@ -230,59 +222,50 @@ PushdownAutomaton ParseAutomatonFile(const std::string& filename) {
   std::string initial_state = initial_state_tokens[0];
   if (states.find(initial_state) == states.end()) {
     throw InvalidDefinitionException(
-        lines[index].number, "initial state '" + initial_state + "' is not in Q");
+        lines[index].number,
+        "initial state '" + initial_state + "' is not in Q");
   }
   ++index;
 
   std::vector<std::string> initial_stack_tokens = Tokenize(lines[index].content);
   if (initial_stack_tokens.size() != 1 || initial_stack_tokens[0].size() != 1) {
     throw InvalidDefinitionException(
-        lines[index].number, "the initial stack symbol must be a single character");
+        lines[index].number,
+        "the initial stack symbol must be a single character");
   }
   char initial_stack_symbol = initial_stack_tokens[0][0];
   if (!stack_alphabet.Contains(initial_stack_symbol)) {
     throw InvalidDefinitionException(
-        lines[index].number, "initial stack symbol '" + std::string(1, initial_stack_symbol) + "' is not in Gamma");
+        lines[index].number,
+        "initial stack symbol '" + std::string(1, initial_stack_symbol) +
+            "' is not in Gamma");
   }
   ++index;
 
-  if (index >= lines.size()) {
-    throw InvalidDefinitionException(lines.back().number, "the definition has no transitions");
-  }
-
-  AutomatonType type;
   std::set<std::string> final_states;
-  TransitionTable transitions;
-
-  std::vector<std::string> next_tokens = Tokenize(lines[index].content);
-  if (LooksLikeTransition(next_tokens, states, input_alphabet, stack_alphabet)) {
-    type = AutomatonType::kEmptyStack;
-    transitions.Add(
-        ParseTransition(lines[index], states, input_alphabet, stack_alphabet));
-    ++index;
-  } else {
-    bool all_states = !next_tokens.empty();
-    for (const std::string& token : next_tokens) {
-      if (states.find(token) == states.end()) {
-        all_states = false;
-        break;
-      }
-    }
-    if (!all_states) {
+  if (type == AutomatonType::kFinalState) {
+    if (index >= lines.size()) {
       throw InvalidDefinitionException(
-          lines[index].number,
-          "line is neither a valid set of final states nor a well-formed transition");
+          lines.back().number,
+          "-type apf was given, but the definition has no set of final "
+          "states after the initial stack symbol");
     }
-    type = AutomatonType::kFinalState;
-    for (const std::string& token : next_tokens) final_states.insert(token);
+    final_states = ParseFinalStates(lines[index], states);
     ++index;
   }
 
+  if (index >= lines.size()) {
+    throw InvalidDefinitionException(lines.back().number,
+                                      "the definition has no transitions");
+  }
+
+  TransitionTable transitions;
   for (; index < lines.size(); ++index) {
     Transition transition =
         ParseTransition(lines[index], states, input_alphabet, stack_alphabet);
     if (IsDuplicate(transitions, transition)) {
-      PrintWarning("line " + std::to_string(lines[index].number) + ": duplicate transition ignored");
+      PrintWarning("line " + std::to_string(lines[index].number) +
+                   ": duplicate transition ignored");
       continue;
     }
     transitions.Add(transition);

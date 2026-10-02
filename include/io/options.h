@@ -18,12 +18,15 @@
 #include <optional>
 #include <string>
 
+#include "model/automaton_type.h"
+
 /**
  * @brief Command-line options accepted by the simulator, filled in by
  * ValidateArguments (see help/help_functions.h).
  */
 struct Options {
   std::string config_file;
+  AutomatonType type = AutomatonType::kEmptyStack;
   bool trace = false;
   std::optional<std::string> input_file;
   std::optional<std::string> output_file;

@@ -41,6 +41,7 @@ TEST(ApplicationTest, RunWithInputFileChecksEveryWordAndPrintsSummary) {
 
   Options options;
   options.config_file = automaton_path;
+  options.type = AutomatonType::kEmptyStack;
   options.input_file = words_path;
 
   std::istringstream in;
@@ -63,6 +64,7 @@ TEST(ApplicationTest, RunWithoutInputFileGoesThroughTheInteractiveMenu) {
 
   Options options;
   options.config_file = automaton_path;
+  options.type = AutomatonType::kEmptyStack;
 
   std::istringstream in("1\naabb\n..\n3\n");
   std::ostringstream out;
@@ -80,6 +82,7 @@ TEST(ApplicationTest, RunWithoutInputFileGoesThroughTheInteractiveMenu) {
 TEST(ApplicationTest, RunWithMissingConfigFileThrowsFileNotFoundException) {
   Options options;
   options.config_file = "/does/not/exist.txt";
+  options.type = AutomatonType::kEmptyStack;
 
   std::istringstream in;
   std::ostringstream out;
@@ -95,6 +98,7 @@ TEST(ApplicationTest, RunWithTraceAndOutputFileWritesTheTraceToThatFile) {
 
   Options options;
   options.config_file = automaton_path;
+  options.type = AutomatonType::kEmptyStack;
   options.input_file = words_path;
   options.trace = true;
   options.output_file = trace_path;
@@ -123,6 +127,7 @@ TEST(ApplicationTest, RunWithUnwritableOutputFileThrowsFileNotFoundException) {
 
   Options options;
   options.config_file = automaton_path;
+  options.type = AutomatonType::kEmptyStack;
   options.trace = true;
   options.output_file = "/";  // a directory can never be opened for writing
 
